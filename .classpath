@@ -23,5 +23,7 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/guava-16.0.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/objectify-5.1.5.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
