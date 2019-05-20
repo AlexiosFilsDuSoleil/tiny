@@ -33,7 +33,7 @@ public class FichePetition extends HttpServlet {
             List<Entity> results = datastore.prepare(q).asList(FetchOptions.Builder.withLimit(5));
 
             req.setAttribute("petitions", results);
-            this.getServletContext().getRequestDispatcher("/WEB-INF/FichePetition.jsp").forward(req, resp);
+            this.getServletContext().getRequestDispatcher("/WEB-INF/FichePetition.html").forward(req, resp);
         } catch (ServletException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Créer une pétition</title>
+		<meta charset="utf-8" />
+	</head>
+
+	<body>
+		<h1>Création de pétition !</h1>
+		<form action="/CreatePetition" method="post">
+			<p>
+				<label>Votre adresse mail : <input type="text" name="mailAuteurPetition" /></label>
+			</p>
+			<p>
+				<label>Titre : <input type="text" name="titrePetition" /></label>
+			</p>
+			<p>
+				<label>Description :
+
+				<textarea name="descriptionPetition" style="width: 200px; height: 100px;"></textarea></label>
+			</p>
+			<p>
+				<input type="submit" />
+			</p>
+		</form>
+		
+	</body>
+</html>

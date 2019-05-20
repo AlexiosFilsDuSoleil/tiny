@@ -21,7 +21,6 @@ public class CreatePetition extends HttpServlet {
 		ObjectifyService.register(Petition.class);
 	}
 	
-	
     public void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -31,7 +30,7 @@ public class CreatePetition extends HttpServlet {
             List<Entity> results = datastore.prepare(q).asList(FetchOptions.Builder.withLimit(100));
 
             req.setAttribute("petitions", results);
-            this.getServletContext().getRequestDispatcher("/WEB-INF/CreatePetition.jsp").forward(req, resp);
+            this.getServletContext().getRequestDispatcher("/WEB-INF/CreatePetition.html").forward(req, resp);
         } catch (ServletException e) {
             e.printStackTrace();
         } catch (IOException e) {
