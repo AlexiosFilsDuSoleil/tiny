@@ -5,37 +5,22 @@
          version="3.1">
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
-    <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
   
-  <servlet>
-		<servlet-name>CreatePetition</servlet-name>
-		<servlet-class>servlets.CreatePetition</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>CreatePetition</servlet-name>
-		<url-pattern>/CreatePetition</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>FichePetition</servlet-name>
-		<servlet-class>servlets.FichePetition</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>FichePetition</servlet-name>
-		<url-pattern>/FichePetition</url-pattern>
-	</servlet-mapping>
-	
-	
-	<!-- Objectify -->
-	
-	<filter>
-        <filter-name>ObjectifyFilter</filter-name>
-        <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
-	</filter>
-	<filter-mapping>
-        <filter-name>ObjectifyFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-	</filter-mapping>
-
+  
+   <servlet>
+        <servlet-name>EndpointsServlet</servlet-name>
+        <servlet-class>com.google.api.server.spi.EndpointsServlet</servlet-class>
+        <init-param>
+            <param-name>services</param-name>
+            <param-value>endpoints.PetitionEndpoint</param-value>
+        </init-param>
+    </servlet>
+    <!-- Route API method requests to the backend. -->
+    <servlet-mapping>
+        <servlet-name>EndpointsServlet</servlet-name>
+        <url-pattern>/_ah/api/*</url-pattern>
+    </servlet-mapping>
+  
+  
 </web-app>

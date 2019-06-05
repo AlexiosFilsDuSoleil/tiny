@@ -270,7 +270,7 @@
         }
       ],
       "sourceAttachmentPath": "",
-      "path": "com/google/appengine/appengine-api-1.0-sdk/1.9.73/appengine-api-1.0-sdk-1.9.73.jar",
+      "path": "com/google/appengine/appengine-api-1.0-sdk/1.9.74/appengine-api-1.0-sdk-1.9.74.jar",
       "attributes": [
         {
           "name": "com.google.cloud.tools.eclipse.appengine.libraries.repository",
@@ -290,7 +290,7 @@
         },
         {
           "name": "com.google.cloud.tools.eclipse.appengine.libraries.version",
-          "value": "1.9.73"
+          "value": "1.9.74"
         },
         {
           "name": "org.eclipse.jst.component.dependency",
@@ -711,6 +711,41 @@
         {
           "name": "org.eclipse.jst.component.dependency",
           "value": "/WEB-INF/lib"
+        }
+      ]
+    },
+    {
+      "accessRules": [],
+      "sourceAttachmentPath": "BIN/com/googlecode/objectify/objectify/5.1.22/objectify-5.1.22-sources.jar",
+      "path": "com/googlecode/objectify/objectify/5.1.22/objectify-5.1.22.jar",
+      "attributes": [
+        {
+          "name": "com.google.cloud.tools.eclipse.appengine.libraries.repository",
+          "value": "central"
+        },
+        {
+          "name": "com.google.cloud.tools.eclipse.appengine.libraries.groupid",
+          "value": "com.googlecode.objectify"
+        },
+        {
+          "name": "com.google.cloud.tools.eclipse.appengine.libraries.artifactId",
+          "value": "objectify"
+        },
+        {
+          "name": "com.google.cloud.tools.eclipse.appengine.libraries.type",
+          "value": "jar"
+        },
+        {
+          "name": "com.google.cloud.tools.eclipse.appengine.libraries.version",
+          "value": "5.1.22"
+        },
+        {
+          "name": "org.eclipse.jst.component.dependency",
+          "value": "/WEB-INF/lib"
+        },
+        {
+          "name": "javadoc_location",
+          "value": "https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22"
         }
       ]
     },
@@ -1401,7 +1436,7 @@
         "repository": "central",
         "groupId": "com.google.appengine",
         "artifactId": "appengine-api-1.0-sdk",
-        "version": "1.9.73",
+        "version": "1.9.74",
         "type": "jar"
       },
       "javadocUri": "https://cloud.google.com/appengine/docs/java/javadoc/",
@@ -1583,6 +1618,20 @@
       "export": true,
       "fixedVersion": false,
       "pinned": false
+    },
+    {
+      "filters": [],
+      "mavenCoordinates": {
+        "repository": "central",
+        "groupId": "com.googlecode.objectify",
+        "artifactId": "objectify",
+        "version": "5.1.22",
+        "type": "jar"
+      },
+      "javadocUri": "https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.22",
+      "export": true,
+      "fixedVersion": false,
+      "pinned": true
     },
     {
       "filters": [],
