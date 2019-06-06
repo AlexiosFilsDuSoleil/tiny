@@ -20,6 +20,7 @@ import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.*;
 
 
 @Api(name = "myApi",
@@ -32,49 +33,10 @@ public class PetitionEndpoint {
 	
 
 
-/* A SUPPRIMER, GARDE COMME EXEMPLE
 
-	@ApiMethod(name = "listAllScore")
-	public List<Entity> listAllScoreEntity() {
-			Query q =
-			    new Query("Score");
-
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
-			return result;
-	}
-
-
-	@ApiMethod(name = "listScore")
-	public List<Entity> listScoreEntity(@Named("name") String name) {
-			Query q =
-			    new Query("Score")
-			        .setFilter(new FilterPredicate("name", FilterOperator.EQUAL, name));
-
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
-			return result;
-	}
-*/
-	
-/*	API PERMETTANT D'AJOUTER DES SCORES
-	@ApiMethod(name = "addScore")
-	public Entity addScore(@Named("score") int score, @Named("name") String name) {
-
-			Entity e = new Entity("Score", ""+name+score);
-			e.setProperty("name", name);
-			e.setProperty("score", score);
-
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			datastore.put(e);
-
-			return  e;
-	}
-*/
-	
 	//API addPetition by Hugo
+	
+	//Ajouter une pétition
 	@ApiMethod(name = "addPetition")
 	public Entity addPetition(@Named("mailAuteurPetition") String mailAuteurPetition, @Named("titrePetition") String titrePetition, @Named("descriptionPetition") String descriptionPetition) {
 
@@ -88,7 +50,8 @@ public class PetitionEndpoint {
 
 			return  e;
 	}
-	
+
+	/* Lister toutes les pétitions, remplacé par la liste des pétitions triées
 	@ApiMethod(name = "listAllPetition")
 	public List<Entity> listAllPetitionEntity() {
 			Query q =
@@ -99,8 +62,9 @@ public class PetitionEndpoint {
 			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
 			return result;
 	}
+*/
 
-
+	//Liste des pétitions en passant un titre en paramètre
 	@ApiMethod(name = "listPetition")
 	public List<Entity> listPetitionEntity(@Named("titrePetition") String titrePetition) {
 			Query q =
@@ -111,5 +75,35 @@ public class PetitionEndpoint {
 			PreparedQuery pq = datastore.prepare(q);
 			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
 			return result;
+	}
+
+
+	//Idem listAllPetition mais trié par titre
+	@ApiMethod(name = "listBestPetition")
+	public List<Entity> listBestPetitionEntity() {
+			Query q =
+			    new Query("Petition")
+			    	.addSort("titrePetition", SortDirection.ASCENDING);
+
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			PreparedQuery pq = datastore.prepare(q);
+			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+			return result;
+	}
+		
+	//Ajouter un vote avec une pétition en paramètre
+	// /!\ En construction /!\
+	@ApiMethod(name = "addVote")
+	public Entity addVote(@Named("titrePetition") String titrePetition, @Named("mailVotant") String mailVotant, @Named("nomVotant") String nomVotant, @Named("prenomVotant") String prenomVotant) {
+
+			Entity e = new Entity("Vote", titrePetition);
+			e.setProperty("mailVotant", mailVotant);
+			e.setProperty("nomVotant", nomVotant);
+			e.setProperty("prenomVotant", prenomVotant);
+
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			datastore.put(e);
+
+			return  e;	
 	}
 }
