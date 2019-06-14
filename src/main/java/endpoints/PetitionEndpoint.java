@@ -1,5 +1,5 @@
 package endpoints;
-
+import com.google.api.server.spi.auth.common.User;
 
 import java.util.List;
 import java.util.Random;
@@ -31,9 +31,6 @@ namespace = @ApiNamespace(ownerDomain = "helloworld.example.com",
 
 public class PetitionEndpoint {
 	
-
-
-
 	//API addPetition by Hugo
 	
 	//Ajouter une pétition
@@ -84,7 +81,6 @@ public class PetitionEndpoint {
 			Query q =
 			    new Query("Petition")
 			    	.addSort("titrePetition", SortDirection.ASCENDING);
-
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			PreparedQuery pq = datastore.prepare(q);
 			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
@@ -95,7 +91,6 @@ public class PetitionEndpoint {
 	// /!\ En construction /!\
 	@ApiMethod(name = "addVote")
 	public Entity addVote(@Named("titrePetition") String titrePetition, @Named("mailVotant") String mailVotant, @Named("nomVotant") String nomVotant, @Named("prenomVotant") String prenomVotant) {
-
 			Entity e = new Entity("Vote", titrePetition);
 			e.setProperty("mailVotant", mailVotant);
 			e.setProperty("nomVotant", nomVotant);

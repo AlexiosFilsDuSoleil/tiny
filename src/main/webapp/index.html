@@ -1,22 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 <meta charset="UTF-8">
-<title>First App Mythrill</title>
+<meta name="google-signin-client_id" content="1041017185509-rkunob4dktvkgba476dsbhdbjf1ll1uj.apps.googleusercontent.com">
+<title>Gilets Jaunes Pas Content</title>
 </head>
 <body>
 
 
-
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
 	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<script>	
-
-
 	
+//Fonctions de connexion
+function onSignIn(googleUser) {
+	 var profile = googleUser.getBasicProfile();
+	 ProfileUser.infos.id= profile.getId()
+	 ProfileUser.infos.nom = profile.getName()
+	 ProfileUser.infos.urlImage = profile.getImageUrl()
+	 ProfileUser.infos.email = profile.getEmail()
+}
+function signOut() {
+	var auth2 = gapi.auth2.getAuthInstance();
+	auth2.signOut().then(function () {
+		console.log('User signed out.');
+		ProfileUser.infos.id= ""
+		ProfileUser.infos.nom = ""
+		ProfileUser.infos.urlImage = ""
+		ProfileUser.infos.email = ""
+	});
+}
+
+var ProfileUser = 
+{
+	infos:
+	{
+		"id":"",
+		"nom":"",
+		"email":"",
+		"urlImage":"",
+	}
+}
+
 //Affichage de la page
 	var Hello = {
 		    view: function() {
 		    	return m("main", [
+		    		m("div", {class:"container"}),
 		            m("h1", {class: "title"}, "TinyPet in Cloud'Giroffle"),
 		            m("h2", {class: "title"}, "Liste des pétitions :"),
 		            m("div", {id: "box"}, m(PetitionView)),
@@ -24,6 +55,10 @@
 		            m("div", {id: "petitionFormorm"}, m(CreationPetitionForm)),
 		            m("h2", {class: "title"}, "Formulaire de création de vote :"),
 		            m("div", {id: "voteForm"}, m(CreationVoteForm)),
+		            m("div", {class: "g-signin2", "data-onsuccess":"onSignIn"}),
+		            m("a",{onclick: function(){
+		            	signOut()
+		            }},"Se déconnecter")
 		        ])
 		    }
 		}	
@@ -100,6 +135,8 @@ var Petition = {
 	    	}
 		}
 
+
+
 //RECUPERATION DES PETITIONS ET AFFICHAGE
 var PetitionView = {
 		oninit: Petition.loadList,
@@ -111,40 +148,36 @@ var PetitionView = {
 		
 }
 
-
-
-
-
-
-
-
-
-
 //Formulaire de création de pétition
 var CreationPetitionForm = {
 			view: function() {
 		        return m("form", {
 		                onsubmit: function(e) {
-		                    e.preventDefault()
-		                    Petition.save()
+		                	if(ProfileUser.infos.id === ""){
+		                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite créer une pétition")
+		                	}else{
+		                		Petition.current.mailAuteurPetition = ProfileUser.infos.email
+		                		e.preventDefault()
+			                    Petition.save()	
+		                	} 
 		                }
 		            }, [
-		            m("label.label", "Votre adresse mail : "),
-		            m("input.input[type=text][placeholder=Votre adresse email]",{
-		                oninput: function (e) {Petition.current.mailAuteurPetition=e.target.value},
-		                value: Petition.current.mailAuteurPetition
-		            }),
-		            m("label.label", "Titre :"),
-		            m("input.input[type=text][placeholder=Titre de la pétition]", {
-		                oninput: function (e) {Petition.current.titrePetition=e.target.value},
-		                value: Petition.current.titrePetition
-		            }),
-		            m("label.label", "Description :"),
-		            m("input.input[type=text][placeholder=Description de la pétition]", {
-		                oninput: function (e) {Petition.current.descriptionPetition=e.target.value},
-		                value: Petition.current.descriptionPetition
-		            }),
-		            m("button.button[type=submit]", "Créer la pétition"),
+		            m("div.form-group", [
+		            	m("label","Titre :"),
+			            m("input.form-control[type=text][placeholder=Titre de la pétition]",{
+			                oninput: function (e) {Petition.current.titrePetition=e.target.value},
+			                value: Petition.current.titrePetition
+			            })
+		            ]),
+		            m("div.form-group", [
+			            m("label", "Description :"),
+			            m("input.form-control[type=text][placeholder=Description de la pétition]", {
+			                oninput: function (e) {Petition.current.descriptionPetition=e.target.value},
+			                value: Petition.current.descriptionPetition
+			            })
+		            ]),
+		            m("br"),
+		            m("button.btn btn-primary[type=submit]", "Créer la pétition"),
 		        ])
 		    }
 	}
@@ -154,8 +187,12 @@ var CreationPetitionForm = {
 			view: function() {
 		        return m("form", {
 		                onsubmit: function(e) {
-		                    e.preventDefault()
-		                    Vote.save()
+		                	if(ProfileUser.infos.id === ""){
+		                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite créer voter")
+		                	}else{
+			                    e.preventDefault()
+			                    Vote.save()
+		                    }
 		                }
 		            }, [
 		            m("label.label", "Titre pétition vote : "),
@@ -163,21 +200,8 @@ var CreationPetitionForm = {
 		                oninput: function (e) {Vote.current.titrePetitionVote=e.target.value},
 		                value: Vote.current.titrePetitionVote
 		            }),
-		            m("label.label", "Mail votant :"),
-		            m("input.input[type=text][placeholder=Mail du votant]", {
-		                oninput: function (e) {Vote.current.mailVotant=e.target.value},
-		                value: Vote.current.mailVotant
-		            }),
-		            m("label.label", "Nom votant :"),
-		            m("input.input[type=text][placeholder=Nom du votant]", {
-		                oninput: function (e) {Vote.current.nomVotant=e.target.value},
-		                value: Vote.current.nomVotant
-		            }),
-		            m("label.label", "Prénom votant :"),
-		            m("input.input[type=text][placeholder=Prénom du votant]", {
-		                oninput: function (e) {Vote.current.prenomVotant=e.target.value},
-		                value: Vote.current.prenomVotant
-		            }),
+		            
+		            m("br"),
 		            m("button.button[type=submit]", "Voter"),
 		        ])
 		    }

@@ -21,8 +21,12 @@
     </plugins>
     
   </build>
-  
   <dependencies>
+	  	<dependency>
+	      <groupId>com.google.apis</groupId>
+	      <artifactId>google-api-services-oauth2</artifactId>
+	      <version>v1-rev155-1.25.0</version>
+    	</dependency>
 		<dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
