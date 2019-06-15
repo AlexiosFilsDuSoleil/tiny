@@ -81,7 +81,27 @@
         	})
     	},
     	
+    	
     	current: {},
+    	
+    	getPetition : function(){
+    		return m.request({
+	            method: "GET",
+	            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listPetition/"+Petition.current.titrePetition,
+	            withCredentials: true,
+	       	})
+	       	.then(function(result) 
+	       	{
+        		if(result === null)
+        		{
+        			Petition.save()
+        		}
+        		else
+        		{
+        			alert("La pétition existe déjà, veuillez choisir un autre nom")
+        		}
+	       	})
+    	},
     	
     	//Sauvegarde des données via le formulaire
     	save: function() {
@@ -118,6 +138,22 @@
 	    	
 	    	current: {},
 	    	
+	    	getPetition : function(){
+				return m.request({
+		            method: "GET",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listPetition/"+Vote.current.titrePetitionVote,
+		            withCredentials: true,
+		       	})
+		       	.then(function(result) 
+		       	{
+            		if(result === null)
+            		{
+            			alert("La pétition n'as pas été trouvé")
+            		}else {
+            			Vote.save()
+            		}
+        		})
+			},
 	    	//Sauvegarde des données via le formulaire
 	    	save: function() {
 	    		console.log("saving...",Vote.current)
@@ -125,7 +161,6 @@
 	        	return m.request({
 		            method: "POST",
 		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/addVote/"+Vote.current.titrePetitionVote+"/"+Vote.current.mailVotant+"/"+Vote.current.nomVotant+"/"+Vote.current.prenomVotant
-		            
 	        	})
 	        	.then(function(result) {
 	        		console.log("got:",result)
@@ -133,8 +168,6 @@
 	        	})
 	    	}
 		}
-
-
 
 	//RECUPERATION DES PETITIONS ET AFFICHAGE
 	var PetitionView = {
@@ -156,7 +189,8 @@
 		                	}else{
 		                		Petition.current.mailAuteurPetition = ProfileUser.infos.email
 		                		e.preventDefault()
-			                    Petition.save()	
+			                    	                		
+		                		Petition.getPetition()	
 		                	} 
 		                }
 		            }, [
@@ -188,8 +222,10 @@
 		                	if(ProfileUser.infos.id === ""){
 		                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite créer voter")
 		                	}else{
+		                		
 			                    e.preventDefault()
-			                    Vote.save()
+			                    Vote.getPetition()
+			                    //Vote.save()
 		                    }
 		                }
 		            }, [

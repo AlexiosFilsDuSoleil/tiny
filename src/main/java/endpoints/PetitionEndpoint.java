@@ -1,4 +1,5 @@
 package endpoints;
+import com.google.api.client.util.store.DataStore;
 import com.google.api.server.spi.auth.common.User;
 
 import java.util.List;
@@ -31,20 +32,18 @@ namespace = @ApiNamespace(ownerDomain = "helloworld.example.com",
 
 public class PetitionEndpoint {
 	
-	//API addPetition by Hugo
+	//API addPetition by Hugo et Pierre
 	
 	//Ajouter une pétition
 	@ApiMethod(name = "addPetition")
 	public Entity addPetition(@Named("mailAuteurPetition") String mailAuteurPetition, @Named("titrePetition") String titrePetition, @Named("descriptionPetition") String descriptionPetition) {
-
-			Entity e = new Entity("Petition", "Petition_"+titrePetition);
+			Entity e = new Entity("Petition", "P_"+titrePetition);
 			e.setProperty("mailAuteurPetition", mailAuteurPetition);
 			e.setProperty("titrePetition", titrePetition);
 			e.setProperty("descriptionPetition", descriptionPetition);
-
+			e.setProperty("nbSignature", 0);
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			datastore.put(e);
-
 			return  e;
 	}
 
@@ -63,15 +62,14 @@ public class PetitionEndpoint {
 
 	//Liste des pétitions en passant un titre en paramètre
 	@ApiMethod(name = "listPetition")
-	public List<Entity> listPetitionEntity(@Named("titrePetition") String titrePetition) {
-			Query q =
-			    new Query("Petition")
-			        .setFilter(new FilterPredicate("titrePetition", FilterOperator.EQUAL, titrePetition));
+	public Entity listPetition(@Named("titrePetition") String titrePetition) {
+		Query q = new Query("Petition")
+		        .setFilter(new FilterPredicate("titrePetition", FilterOperator.EQUAL, titrePetition));
 
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
-			return result;
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery pq = datastore.prepare(q);
+		Entity result = pq.asSingleEntity();
+		return result;
 	}
 
 
@@ -90,12 +88,10 @@ public class PetitionEndpoint {
 	//Ajouter un vote avec une pétition en paramètre
 	// /!\ En construction /!\
 	@ApiMethod(name = "addVote")
-	public Entity addVote(@Named("titrePetition") String titrePetition, @Named("mailVotant") String mailVotant, @Named("nomVotant") String nomVotant, @Named("prenomVotant") String prenomVotant) {
-			Entity e = new Entity("Vote", titrePetition);
-			e.setProperty("mailVotant", mailVotant);
-			e.setProperty("nomVotant", nomVotant);
-			e.setProperty("prenomVotant", prenomVotant);
-
+	public Entity addVote(@Named("petitionParent") String petitionParent) {
+		
+			Entity e = new Entity("Vote", petitionParent);
+						
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			datastore.put(e);
 
