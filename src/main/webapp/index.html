@@ -1,73 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link href="CSS.css" rel="stylesheet" media="all" type="text/css"> 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
 <meta charset="UTF-8">
 <meta name="google-signin-client_id" content="1041017185509-rkunob4dktvkgba476dsbhdbjf1ll1uj.apps.googleusercontent.com">
 <title>Gilets Jaunes Pas Content</title>
 </head>
-<body>
-
-
+<body style="background-color:powderblue;">
 	<script src="https://apis.google.com/js/platform.js" async defer></script>
 	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<script>	
-	
-//Fonctions de connexion
-function onSignIn(googleUser) {
-	 var profile = googleUser.getBasicProfile();
-	 ProfileUser.infos.id= profile.getId()
-	 ProfileUser.infos.nom = profile.getName()
-	 ProfileUser.infos.urlImage = profile.getImageUrl()
-	 ProfileUser.infos.email = profile.getEmail()
-}
-function signOut() {
-	var auth2 = gapi.auth2.getAuthInstance();
-	auth2.signOut().then(function () {
-		console.log('User signed out.');
-		ProfileUser.infos.id= ""
-		ProfileUser.infos.nom = ""
-		ProfileUser.infos.urlImage = ""
-		ProfileUser.infos.email = ""
-	});
-}
-
-var ProfileUser = 
-{
-	infos:
-	{
-		"id":"",
-		"nom":"",
-		"email":"",
-		"urlImage":"",
+	//Fonctions de connexion
+	function onSignIn(googleUser) {
+		 var profile = googleUser.getBasicProfile();
+		 ProfileUser.infos.id= profile.getId()
+		 ProfileUser.infos.nom = profile.getName()
+		 ProfileUser.infos.urlImage = profile.getImageUrl()
+		 ProfileUser.infos.email = profile.getEmail()
 	}
-}
+	function signOut() {
+		var auth2 = gapi.auth2.getAuthInstance();
+		auth2.signOut().then(function () {
+			console.log('User signed out.');
+			ProfileUser.infos.id= ""
+			ProfileUser.infos.nom = ""
+			ProfileUser.infos.urlImage = ""
+			ProfileUser.infos.email = ""
+		});
+	}
+	
+	var ProfileUser = 
+	{
+		infos:
+		{
+			"id":"",
+			"nom":"",
+			"email":"",
+			"urlImage":"",
+		}
+	}
 
-//Affichage de la page
-	var Hello = {
+	//Affichage de la page
+	var Body = {
 		    view: function() {
 		    	return m("main", [
-		    		m("div", {class:"container"}),
-		            m("h1", {class: "title"}, "TinyPet in Cloud'Giroffle"),
-		            m("h2", {class: "title"}, "Liste des pétitions :"),
-		            m("div", {id: "box"}, m(PetitionView)),
-		            m("h2", {class: "title"}, "Formulaire de création de pétition :"),
-		            m("div", {id: "petitionFormorm"}, m(CreationPetitionForm)),
-		            m("h2", {class: "title"}, "Formulaire de création de vote :"),
-		            m("div", {id: "voteForm"}, m(CreationVoteForm)),
-		            m("div", {class: "g-signin2", "data-onsuccess":"onSignIn"}),
-		            m("a",{onclick: function(){
-		            	signOut()
-		            }},"Se déconnecter"),
-		            m("h3", {class: "title"}, "Bas de page"),
+		    		m("div", {class:"container"}, [
+			            m("h1", {class: "title"}, "TinyPet in Cloud'Giroffle"),
+			            m("h2", {class: "title"}, "Liste des pétitions :"),
+			            m("div", {id: "box"}, m(PetitionView)),
+			            m("h2", {class: "title"}, "Formulaire de création de pétition :"),
+			            m("div", {id: "petitionFormorm"}, m(CreationPetitionForm)),
+			            m("h2", {class: "title"}, "Formulaire de création de vote :"),
+			            m("div", {id: "voteForm"}, m(CreationVoteForm)),
+			            m("div", {class: "g-signin2", "data-onsuccess":"onSignIn"}),
+			            m("a",{onclick: function(){
+			            	signOut()
+			            }},"Se déconnecter"),
+		            ]),
 		        ])
 		    }
 		}	
 	
 
 	
-//PETITIONS
-var Petition = {
+	//PETITIONS
+	var Petition = {
 		
 		//Charger les données pour créer la liste des pétitions existantes
     	list: [],
@@ -138,19 +136,18 @@ var Petition = {
 
 
 
-//RECUPERATION DES PETITIONS ET AFFICHAGE
-var PetitionView = {
+	//RECUPERATION DES PETITIONS ET AFFICHAGE
+	var PetitionView = {
 		oninit: Petition.loadList,
 	    view: function() {
 	        return m(".user-list", Petition.list.map(function(item) {
 	            return m(".user-list-item", "- " + item.properties.mailAuteurPetition + " a posté " + item.properties.titrePetition + " " + item.properties.descriptionPetition)
 	        }))
-	    },
-		
-}
+	    },	
+	}
 
-//Formulaire de création de pétition
-var CreationPetitionForm = {
+	//Formulaire de création de pétition
+	var CreationPetitionForm = {
 			view: function() {
 		        return m("form", {
 		                onsubmit: function(e) {
@@ -177,7 +174,7 @@ var CreationPetitionForm = {
 			                value: Petition.current.descriptionPetition
 			            })
 		            ]),
-		            m("br"),
+		       
 		            m("button.btn btn-primary[type=submit]", "Créer la pétition"),
 		        ])
 		    }
@@ -196,20 +193,18 @@ var CreationPetitionForm = {
 		                    }
 		                }
 		            }, [
-		            m("label.label", "Titre pétition vote : "),
-		            m("input.input[type=text][placeholder=Titre de la pétition]",{
+		            	m("div.form-group", [
+		            m("label", "Titre pétition vote : "),
+		            m("input.form-control[type=text][placeholder=Titre de la pétition]",{
 		                oninput: function (e) {Vote.current.titrePetitionVote=e.target.value},
 		                value: Vote.current.titrePetitionVote
 		            }),
-		            
-		            m("br"),
-		            m("button.button[type=submit]", "Voter"),
+		          ]),
+		            m("button.btn btn-primary[type=submit]", "Voter"),
 		        ])
 		    }
 	}
-m.mount(document.body, Hello)	
-
-
+m.mount(document.body, Body)	
 </script>
 </body>
 </html>
