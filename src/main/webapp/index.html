@@ -157,10 +157,10 @@
 	    	//Sauvegarde des données via le formulaire
 	    	save: function() {
 	    		console.log("saving...",Vote.current)
-	    		console.log("https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/addVote/"+Vote.current.titrePetitionVote+"/"+Vote.current.mailVotant+"/"+Vote.current.nomVotant+"/"+Vote.current.prenomVotant)
+	    		console.log("https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/addVote/"+Vote.current.titrePetitionVote+"/"+ProfileUser.infos.email+"/"+ProfileUser.infos.nom)
 	        	return m.request({
 		            method: "POST",
-		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/addVote/"+Vote.current.titrePetitionVote+"/"+Vote.current.mailVotant+"/"+Vote.current.nomVotant+"/"+Vote.current.prenomVotant
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/addVote/"+Vote.current.titrePetitionVote+"/"+ProfileUser.infos.email+"/"+ProfileUser.infos.nom
 	        	})
 	        	.then(function(result) {
 	        		console.log("got:",result)
@@ -221,11 +221,10 @@
 		                onsubmit: function(e) {
 		                	if(ProfileUser.infos.id === ""){
 		                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite créer voter")
-		                	}else{
 		                		
+		                	}else{
 			                    e.preventDefault()
 			                    Vote.getPetition()
-			                    //Vote.save()
 		                    }
 		                }
 		            }, [
