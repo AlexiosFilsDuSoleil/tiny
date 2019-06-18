@@ -88,7 +88,7 @@ public class PetitionEndpoint {
 	public List<Entity> listBestPetitionEntity() {
 			Query q =
 			    new Query("Petition")
-			    	.addSort("titrePetition", SortDirection.ASCENDING);
+			    	.addSort("nbSignature", SortDirection.ASCENDING);
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			PreparedQuery pq = datastore.prepare(q);
 			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
@@ -152,5 +152,18 @@ public class PetitionEndpoint {
 		    }
 			return res;
 	}
+	
+		
+	//Liste des pétitions en passant un titre en paramètre
+		@ApiMethod(name = "listMyPetition", path="listMyPetition/{mailAuteurPetition}")
+		public List<Entity> listMyPetition(@Named("mailAuteurPetition") String mailAuteurPetition) {
+			Query q = new Query("Petition")
+			        .setFilter(new FilterPredicate("mailAuteurPetition", FilterOperator.EQUAL, mailAuteurPetition));
+
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			PreparedQuery pq = datastore.prepare(q);
+			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+			return result;
+		}
 	
 }

@@ -56,12 +56,13 @@
 				            			m("th","Vote"),
 				            		]),
 				            	]),
-				            	
-				        		m(PetitionView)
-			        				
+				        		m(PetitionView)	
 				            ]),
 				            m("div.container", {style:"text-align:center"}, [
-					            m("button.btn btn-warning", {style:"margin-right:50px"}, "Mes pétitions"),
+					            m("button.btn btn-warning", {style:"margin-right:50px", onclick: function(){
+					            	m.route.set('/myPetition')
+					            	
+					            }},"Mes pétitions"),
 					            m("button.btn btn-dark", "Mes signatures"),
 				            ]),
 				            m("h2", {class: "title"}, "Formulaire de création de pétition :"),
@@ -77,7 +78,27 @@
 			    }
 			}	
 		
-	
+		//Affichage de la page
+		var DisplayPetitionUser = {
+			    view: function() {
+			    	return m("main", [
+			    		m("div", {class:"container"}, [
+				            m("h1", {class: "title"}, "Vos pétitions"),
+				            m("h2", {class: "title"}, "Liste de vos pétitions :"),
+				            m("table.table table-hover",[
+				            	m("thead", [
+				            		m("tr",[
+				            			m("th", "Nom"),
+				            			m("th", "Description"),
+				            			m("th","Vote"),
+				            		]),
+				            	]),
+				        		m(MyPetitionView)	
+				            ]),
+			            ]),
+			        ])
+			    }
+			}	
 		
 		//PETITIONS
 		var Petition = {
@@ -96,14 +117,32 @@
 	        	})
 	    	},
 	    	
-	    	
 	    	current: {},
-	    	
+	    	myPetitionList: [],
+	    	getMyPetition: function(){
+	    		return m.request({
+		            method: "GET",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listMyPetition/"+ProfileUser.infos.email,
+		          
+		       	})
+		       	.then(function(result) 
+		       	{
+	        		if(result === null)
+	        		{
+	        			
+	        		}
+	        		else
+	        		{
+	        			
+	        			console.log("resultRequete:",result)
+	        			Petition.myPetitionList = result.items
+	        		}
+		       	})
+	    	},
 	    	getPetition : function(){
 	    		return m.request({
 		            method: "GET",
 		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listPetition/"+Petition.current.titrePetition,
-		            withCredentials: true,
 		       	})
 		       	.then(function(result) 
 		       	{
@@ -204,6 +243,22 @@
 		        }))
 		    },	
 		}
+		
+		//RECUPERATION DES PETITIONS ET AFFICHAGE
+		var MyPetitionView = {
+			oninit: Petition.getMyPetition,
+		    view: function() {
+		    	return m("tbody", Petition.myPetitionList.map(function(item) {
+		            return m("tr", {onclick:function(){
+		            	alert(item.properties.titrePetition)
+		            }} ,[
+		        			m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
+		        			m("td.user-list-item",item.properties.descriptionPetition),
+		        			m("td.user-list-item",item.properties.nbSignature),
+		        		])
+		        }))
+		    },	
+		}
 	
 		//Formulaire de création de pétition
 		var CreationPetitionForm = {
@@ -273,6 +328,7 @@
 		}
 		m.route(document.body, "/home", {
 	  		"/home": Body,
+	  		"/myPetition": DisplayPetitionUser,
 	  	})
   	
 
