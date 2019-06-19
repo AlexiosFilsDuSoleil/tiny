@@ -13,7 +13,9 @@ import com.google.api.server.spi.config.Named;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
@@ -154,7 +156,7 @@ public class PetitionEndpoint {
 	}
 	
 		
-	//Liste des pétitions en passant un titre en paramètre
+		//Liste des pétitions en passant un titre en paramètre
 		@ApiMethod(name = "listMyPetition", path="listMyPetition/{mailAuteurPetition}")
 		public List<Entity> listMyPetition(@Named("mailAuteurPetition") String mailAuteurPetition) {
 			Query q = new Query("Petition")
@@ -165,5 +167,33 @@ public class PetitionEndpoint {
 			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 			return result;
 		}
+		
+		//Liste des pétitions en passant un titre en paramètre
+		@ApiMethod(name = "listVotePetition", path="listVotePetition/{listSignature}")
+		public List<Entity> listVotePetition(@Named("listSignature") String listSignature) {
+			Query q = new Query("Vote")
+			        .setFilter(new FilterPredicate("listSignature", FilterOperator.EQUAL, listSignature));
+			
+			
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			PreparedQuery pq = datastore.prepare(q);
+			List<Entity> res = pq.asList(FetchOptions.Builder.withLimit(100));
+			List<Entity> result = new ArrayList<Entity>();
+			for (Entity entite : res) 
+			{ 
+			    try {
+			    	Entity e = datastore.get(entite.getParent());
+			    	result.add(e);
+			    } catch (EntityNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}finally {
+			    	
+			    }
+			}
+			return result;
+		}
+		
+		
 	
 }

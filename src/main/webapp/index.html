@@ -61,9 +61,10 @@
 				            m("div.container", {style:"text-align:center"}, [
 					            m("button.btn btn-warning", {style:"margin-right:50px", onclick: function(){
 					            	m.route.set('/myPetition')
-					            	
 					            }},"Mes pétitions"),
-					            m("button.btn btn-dark", "Mes signatures"),
+					            m("button.btn btn-dark",{onclick: function(){
+					            	m.route.set('/myVote')
+					            }}, "Mes signatures"),
 				            ]),
 				            m("h2", {class: "title"}, "Formulaire de création de pétition :"),
 				            m("div", {id: "petitionFormorm"}, m(CreationPetitionForm)),
@@ -78,7 +79,7 @@
 			    }
 			}	
 		
-		//Affichage de la page
+		//Affichage de la page des pétitions créées
 		var DisplayPetitionUser = {
 			    view: function() {
 			    	return m("main", [
@@ -94,6 +95,28 @@
 				            		]),
 				            	]),
 				        		m(MyPetitionView)	
+				            ]),
+			            ]),
+			        ])
+			    }
+			}	
+		
+		//Affichage de la page des pétitions créées
+		var DisplayPetitionVoteUser = {
+			    view: function() {
+			    	return m("main", [
+			    		m("div", {class:"container"}, [
+				            m("h1", {class: "title"}, "Vos pétitions"),
+				            m("h2", {class: "title"}, "Liste de vos pétitions :"),
+				            m("table.table table-hover",[
+				            	m("thead", [
+				            		m("tr",[
+				            			m("th", "Nom"),
+				            			m("th", "Description"),
+				            			m("th","Vote"),
+				            		]),
+				            	]),
+				        		m(MyVoteView)	
 				            ]),
 			            ]),
 			        ])
@@ -127,18 +150,14 @@
 		       	})
 		       	.then(function(result) 
 		       	{
-	        		if(result === null)
+	        		if(result !== null)
 	        		{
-	        			
-	        		}
-	        		else
-	        		{
-	        			
 	        			console.log("resultRequete:",result)
 	        			Petition.myPetitionList = result.items
 	        		}
 		       	})
 	    	},
+	    	
 	    	getPetition : function(){
 	    		return m.request({
 		            method: "GET",
@@ -194,7 +213,53 @@
 		    	},*/
 		    	
 		    	current: {},
+		    	myVoteList :[],
+		    	getMyVote: function(){
+		    		return m.request({
+			            method: "GET",
+			            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listVotePetition/"+ProfileUser.infos.email,
+			          
+			       	})
+			       	.then(function(result) 
+			       	{
+			       		console.log("https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listVotePetition/"+ProfileUser.infos.email)
+		        		if(result !== null)
+		        		{
+		        			console.log("result vote:",result.items)
+		        			Vote.myVoteList = result.items
+		        		}
+			       	})
+		    	},
 		    	
+		    	getMyUniqueVote: function(){
+		    		return m.request({
+			            method: "GET",
+			            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listVotePetition/"+ProfileUser.infos.email,
+			          
+			       	})
+			       	.then(function(result) 
+			       	{
+			       		console.log("https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listVotePetition/"+ProfileUser.infos.email)
+		        		if(result !== null)
+		        		{
+		        			var trouve = false
+		        			console.log("result vote unique:",result.items)
+		        			for(var i=0; i <result.items.length; i++){
+            					console.log("Item :" + result.items[i].properties.titrePetition)
+            					if(result.items[i].properties.titrePetition === Vote.current.titrePetitionVote){
+            						trouve = true
+            					}
+            				}
+            				if(!trouve){
+            					Vote.save()
+    	            			m.route.set('/home')
+            				}else{
+            					alert("vous avez deja signé")
+            				}
+		        			
+		        		}
+			       	})
+		    	},
 		    	getPetition : function(){
 					return m.request({
 			            method: "GET",
@@ -208,8 +273,9 @@
 	            			alert("La pétition n'as pas été trouvé")
 	            			
 	            		}else {
-	            			Vote.save()
-	            			m.route.set('/home')
+	            			
+	            			Vote.getMyUniqueVote()
+	            			
 	            		}
 	        		})
 				},
@@ -223,7 +289,8 @@
 		        	})
 		        	.then(function(result) {
 		        		console.log("got:",result)
-		        		//Vote.loadList()
+		        		m.route.set("/home")
+		        		m.redraw(true)
 		        	})
 		    	}
 			}
@@ -253,6 +320,23 @@
 		            	alert(item.properties.titrePetition)
 		            }} ,[
 		        			m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
+		        			m("td.user-list-item",item.properties.descriptionPetition),
+		        			m("td.user-list-item",item.properties.nbSignature),
+		        		])
+		        }))
+		    },	
+		}
+		
+		//RECUPERATION DES PETITIONS ET AFFICHAGE
+		var MyVoteView = {
+			oninit: Vote.getMyVote,
+		    view: function() {
+		    	return m("tbody", Vote.myVoteList.map(function(item) {
+		            return m("tr", {onclick:function(){
+		            	alert(item.properties.titrePetition)
+		            }} ,[
+		            	
+			            	m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
 		        			m("td.user-list-item",item.properties.descriptionPetition),
 		        			m("td.user-list-item",item.properties.nbSignature),
 		        		])
@@ -329,6 +413,7 @@
 		m.route(document.body, "/home", {
 	  		"/home": Body,
 	  		"/myPetition": DisplayPetitionUser,
+	  		"/myVote":DisplayPetitionVoteUser,
 	  	})
   	
 
