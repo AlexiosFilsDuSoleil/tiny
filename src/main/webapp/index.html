@@ -104,6 +104,7 @@
 				            			m("th", "Nom"),
 				            			m("th", "Description"),
 				            			m("th","Vote"),
+				            			m("th","Signer"),
 				            		]),
 				            	]),
 				        		m(MyPetitionView)	
@@ -125,6 +126,7 @@
 				            			m("th", "Nom"),
 				            			m("th", "Description"),
 				            			m("th","Vote"),
+				            			m("th","Signer"),
 				            		]),
 				            	]),
 				        		m(BestPetition)	
@@ -287,17 +289,22 @@
 	        		}
 		       	})
 	    	},
+	    	titrePetitionSignature:"",
 	    	votePetitionList :[],
 	    	getVotePetition : function(){
+	    		console.log("https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/VotePetition/"+Petition.titrePetitionSignature)
 	    		return m.request({
 		            method: "GET",
-		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/VotePetition/Essai",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/VotePetition/"+Petition.titrePetitionSignature,
 		            withCredentials: true,
 		       	})
 		       	.then(function(result) 
 		       	{
-            		Petition.votePetitionList = result.items   
-            		m.redraw(true)
+		       		if(result !== null)
+	        		{
+            			Petition.votePetitionList = result.items   
+            			m.redraw(true)
+	        		}
         		})
 	    	},
 	    	
@@ -428,13 +435,16 @@
 		    	return m("tbody", Petition.list.map(function(item) {
 		            return m("tr", [
 		        			m("th.user-list-item", {onclick:function(){
+		        				Petition.titrePetitionSignature = item.properties.titrePetition
 				            	m.route.set("/VotePetition")
 				            } ,scope:"row"}, item.properties.titrePetition),
 		        			m("td.user-list-item",{onclick:function(){
-				            	alert(item.properties.titrePetition)
+		        				Petition.titrePetitionSignature = item.properties.titrePetition
+				            	m.route.set("/VotePetition")
 				            }} ,item.properties.descriptionPetition),
 		        			m("td.user-list-item",{onclick:function(){
-				            	alert(item.properties.titrePetition)
+		        				Petition.titrePetitionSignature = item.properties.titrePetition
+				            	m.route.set("/VotePetition")
 				            }} ,item.properties.nbSignature),
 		        			m("td",[m("button.btn btn-primary", {onclick: function(){
 		        				if(ProfileUser.infos.id === ""){
@@ -454,12 +464,27 @@
 			oninit: Petition.getMyPetition,
 		    view: function() {
 		    	return m("tbody", Petition.myPetitionList.map(function(item) {
-		            return m("tr", {onclick:function(){
-		            	alert(item.properties.titrePetition)
-		            }} ,[
-		        			m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
-		        			m("td.user-list-item",item.properties.descriptionPetition),
-		        			m("td.user-list-item",item.properties.nbSignature),
+		            return m("tr", [
+		            	m("th.user-list-item", {onclick:function(){
+	        				Petition.titrePetitionSignature = item.properties.titrePetition
+			            	m.route.set("/VotePetition")
+			            } ,scope:"row"}, item.properties.titrePetition),
+	        			m("td.user-list-item",{onclick:function(){
+	        				Petition.titrePetitionSignature = item.properties.titrePetition
+			            	m.route.set("/VotePetition")
+			            }} ,item.properties.descriptionPetition),
+	        			m("td.user-list-item",{onclick:function(){
+	        				Petition.titrePetitionSignature = item.properties.titrePetition
+			            	m.route.set("/VotePetition")
+			            }} ,item.properties.nbSignature),
+	        			m("td",[m("button.btn btn-primary", {onclick: function(){
+	        				if(ProfileUser.infos.id === ""){
+		                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite voter")
+		                	}else{
+	        					Vote.current.titrePetitionVote = item.properties.titrePetition
+	        					Vote.getPetition()
+		                	}
+			            }},"Signer")]),
 		        		])
 		        }))
 		    },	
@@ -468,9 +493,7 @@
 		var SignaturePetView = {
 				oninit: Petition.getVotePetition,
 			    view: function() {
-			    	console.log(Petition.votePetitionList)
 			    	return m("tbody", Petition.votePetitionList.map(function(item) {
-			    		console.log("asse")
 			            return m("tr",[
 			        			m("th.user-list-item", {scope:"row"}, item.email),
 			        		])
@@ -482,12 +505,27 @@
 				oninit: Petition.getBestPetition,
 			    view: function() {
 			    	return m("tbody", Petition.myPetitionList.map(function(item) {
-			            return m("tr", {onclick:function(){
-			            	alert(item.properties.titrePetition)
-			            }} ,[
-			        			m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
-			        			m("td.user-list-item",item.properties.descriptionPetition),
-			        			m("td.user-list-item",item.properties.nbSignature),
+			            return m("tr", [
+			            	m("th.user-list-item", {onclick:function(){
+		        				Petition.titrePetitionSignature = item.properties.titrePetition
+				            	m.route.set("/VotePetition")
+				            } ,scope:"row"}, item.properties.titrePetition),
+		        			m("td.user-list-item",{onclick:function(){
+		        				Petition.titrePetitionSignature = item.properties.titrePetition
+				            	m.route.set("/VotePetition")
+				            }} ,item.properties.descriptionPetition),
+		        			m("td.user-list-item",{onclick:function(){
+		        				Petition.titrePetitionSignature = item.properties.titrePetition
+				            	m.route.set("/VotePetition")
+				            }} ,item.properties.nbSignature),
+		        			m("td",[m("button.btn btn-primary", {onclick: function(){
+		        				if(ProfileUser.infos.id === ""){
+			                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite voter")
+			                	}else{
+		        					Vote.current.titrePetitionVote = item.properties.titrePetition
+		        					Vote.getPetition()
+			                	}
+				            }},"Signer")]),
 			        		])
 			        }))
 			    },	
@@ -499,7 +537,8 @@
 		    view: function() {
 		    	return m("tbody", Vote.myVoteList.map(function(item) {
 		            return m("tr", {onclick:function(){
-		            	alert(item.properties.titrePetition)
+		            	Petition.titrePetitionSignature = item.properties.titrePetition
+		            	m.route.set("/VotePetition")
 		            }} ,[
 		            	
 			            	m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),

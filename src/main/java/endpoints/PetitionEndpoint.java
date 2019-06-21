@@ -115,22 +115,24 @@ public class PetitionEndpoint {
 			PreparedQuery pq = datastore.prepare(q);
 			Entity petition = pq.asSingleEntity();
 			String keyPet = (String)petition.getProperty("lastIndexOfSignature");
-			String chaine = keyPet.substring(keyPet.length()-1);
 			List<PetitionSignature> listeSignature = new ArrayList<PetitionSignature>();
-		
-			int index = (Integer.parseInt(chaine));
-			if(index > 0) {
-				for(int i=index; i >= 1; i--) {
-					Query querySign =
-						    new Query("Vote")
-						    .setFilter(new FilterPredicate("indiceListeVote", FilterOperator.EQUAL, titrePetition+"V_"+i));
-					PreparedQuery prepare = datastore.prepare(querySign);
-					Entity signature = prepare.asSingleEntity();
-					List<String> signatureListe = (ArrayList)signature.getProperty("listSignature");
-					
-					if(signatureListe.size() > 0) {
-						for(int nb=0; nb < signatureListe.size(); nb++) {
-							listeSignature.add(new PetitionSignature(signatureListe.get(nb)));					
+			if(keyPet != null) {
+				String chaine = keyPet.substring(keyPet.length()-1);
+			
+				int index = (Integer.parseInt(chaine));
+				if(index > 0) {
+					for(int i=index; i >= 1; i--) {
+						Query querySign =
+							    new Query("Vote")
+							    .setFilter(new FilterPredicate("indiceListeVote", FilterOperator.EQUAL, titrePetition+"V_"+i));
+						PreparedQuery prepare = datastore.prepare(querySign);
+						Entity signature = prepare.asSingleEntity();
+						List<String> signatureListe = (ArrayList)signature.getProperty("listSignature");
+						
+						if(signatureListe != null && signatureListe.size() > 0) {
+							for(int nb=0; nb < signatureListe.size(); nb++) {
+								listeSignature.add(new PetitionSignature(signatureListe.get(nb)));					
+							}
 						}
 					}
 				}
