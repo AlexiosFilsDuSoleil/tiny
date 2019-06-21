@@ -2,6 +2,7 @@ package endpoints;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.server.spi.auth.common.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +17,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.PreparedQuery.TooManyResultsException;
@@ -25,6 +27,7 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.repackaged.com.google.type.Date;
 import com.google.appengine.api.datastore.Query.*;
 
 
@@ -38,6 +41,10 @@ public class PetitionEndpoint {
 	
 	//API addPetition by Hugo et Pierre
 	
+	// variable permettant de définir le nombre de pétition a afficher sur l'écran d'accueil
+	int limitePet = 50;
+	int limiteOffSet = 0;
+	
 	//Ajouter une pétition
 	@ApiMethod(name = "addPetition")
 	public Entity addPetition(@Named("mailAuteurPetition") String mailAuteurPetition, @Named("titrePetition") String titrePetition, @Named("descriptionPetition") String descriptionPetition) {
@@ -46,6 +53,9 @@ public class PetitionEndpoint {
 			petition.setProperty("titrePetition", titrePetition);
 			petition.setProperty("descriptionPetition", descriptionPetition);
 			petition.setProperty("nbSignature", 0);
+			
+			long madate = System.currentTimeMillis();
+			petition.setProperty("dateCreation",madate);
 			petition.setProperty("lastIndexOfSignature", titrePetition+"V_1");
 			
 			List arrayListSignature = new ArrayList();
@@ -59,19 +69,7 @@ public class PetitionEndpoint {
 			return  petition;
 	}
 
-	/* Lister toutes les pétitions, remplacé par la liste des pétitions triées
-	@ApiMethod(name = "listAllPetition")
-	public List<Entity> listAllPetitionEntity() {
-			Query q =
-			    new Query("Petition");
-
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
-			return result;
-	}
-*/
-
+	
 	//Liste des pétitions en passant un titre en paramètre
 	@ApiMethod(name = "listPetition")
 	public Entity listPetition(@Named("titrePetition") String titrePetition) {
@@ -84,21 +82,99 @@ public class PetitionEndpoint {
 		return result;
 	}
 
-
-	//Idem listAllPetition mais trié par titre
-	@ApiMethod(name = "listBestPetition")
-	public List<Entity> listBestPetitionEntity() {
+	// list des 100 meilleures pétitions
+	@ApiMethod(name = "listeBestOfPetition", path="listeBestOfPetition")
+	public List<Entity> listeBestOfPetition() {
 			Query q =
 			    new Query("Petition")
-			    	.addSort("nbSignature", SortDirection.ASCENDING);
+			    .addSort("nbSignature",SortDirection.DESCENDING);
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
+			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
 			return result;
 	}
+
+	//liste des pétitions avec une limite
+	@ApiMethod(name = "listBestPetition", path="listBestPetition")
+	public List<Entity> listBestPetitionEntity() {
+			Query q =
+			    new Query("Petition");
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			PreparedQuery pq = datastore.prepare(q);
+			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(limitePet));
+			return result;
+	}
+	
+	// Recupere tout les votes d'une pétition
+	@ApiMethod(name = "VotePetition", path="VotePetition/{titrePetition}")
+	public List<PetitionSignature> getVotePetition(@Named("titrePetition") String titrePetition) {
+			Query q =
+			    new Query("Petition")
+			    .setFilter(new FilterPredicate("titrePetition", FilterOperator.EQUAL, titrePetition));
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			PreparedQuery pq = datastore.prepare(q);
+			Entity petition = pq.asSingleEntity();
+			String keyPet = (String)petition.getProperty("lastIndexOfSignature");
+			String chaine = keyPet.substring(keyPet.length()-1);
+			List<PetitionSignature> listeSignature = new ArrayList<PetitionSignature>();
 		
-	//Ajouter un vote avec une pétition en paramètre
-	// /!\ En construction /!\
+			int index = (Integer.parseInt(chaine));
+			if(index > 0) {
+				for(int i=index; i >= 1; i--) {
+					Query querySign =
+						    new Query("Vote")
+						    .setFilter(new FilterPredicate("indiceListeVote", FilterOperator.EQUAL, titrePetition+"V_"+i));
+					PreparedQuery prepare = datastore.prepare(querySign);
+					Entity signature = prepare.asSingleEntity();
+					List<String> signatureListe = (ArrayList)signature.getProperty("listSignature");
+					
+					if(signatureListe.size() > 0) {
+						for(int nb=0; nb < signatureListe.size(); nb++) {
+							listeSignature.add(new PetitionSignature(signatureListe.get(nb)));					
+						}
+					}
+				}
+			}
+			return listeSignature;
+	}
+	
+	//Récupere les suivants et précédents...
+	// Un peu bugué il faudrait trouver un autre système
+	// MArche bien pour le suivant. Le précédent un peu moins
+	@ApiMethod(name = "nextCursor", path="nextCursor/{cursor}/{key}")
+	public List<Entity> getNextCursor(@Named("cursor") String cursor, @Named("key") String key) {
+		Key clePetition = KeyFactory.createKey("Petition", "P_"+key);	
+		Query q;
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		List<Entity> result;
+		if(cursor.equals("next")) {
+			q =
+			    new Query("Petition")
+			    .setFilter(new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.GREATER_THAN, clePetition));
+			PreparedQuery pq = datastore.prepare(q);
+			result = pq.asList(FetchOptions.Builder.withLimit(limitePet));
+			if(result.size() > 0) {
+				limiteOffSet +=limitePet;
+			} 
+		}else {
+			if(limiteOffSet > 0) {			
+				limiteOffSet -= limitePet;
+			}
+			q =
+				    new Query("Petition")
+				    .setFilter(new FilterPredicate(Entity.KEY_RESERVED_PROPERTY, FilterOperator.LESS_THAN, clePetition));
+			PreparedQuery pq = datastore.prepare(q);
+			result = pq.asList(FetchOptions.Builder.withOffset(limiteOffSet));
+			if(limiteOffSet > 0) {			
+				limiteOffSet -= limitePet;
+			}
+		}
+			
+			return result;
+	}
+
+		
+	// Ajouter un vote
 	@ApiMethod(name = "addVote")
 	public Entity addVote(@Named("petitionParent") String petitionParent, @Named("emailVotant") String emailVotant, @Named("nomVotant") String nomVotant) {
 			
@@ -156,7 +232,7 @@ public class PetitionEndpoint {
 	}
 	
 		
-		//Liste des pétitions en passant un titre en paramètre
+		//Recupere toutes les petititons crées par une personne
 		@ApiMethod(name = "listMyPetition", path="listMyPetition/{mailAuteurPetition}")
 		public List<Entity> listMyPetition(@Named("mailAuteurPetition") String mailAuteurPetition) {
 			Query q = new Query("Petition")
@@ -164,11 +240,11 @@ public class PetitionEndpoint {
 
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			PreparedQuery pq = datastore.prepare(q);
-			List<Entity> result = pq.asList(FetchOptions.Builder.withLimit(100));
+			List<Entity> result = pq.asList(FetchOptions.Builder.withDefaults());
 			return result;
 		}
 		
-		//Liste des pétitions en passant un titre en paramètre
+		//Liste de toutes les pétitions signé par un user
 		@ApiMethod(name = "listVotePetition", path="listVotePetition/{listSignature}")
 		public List<Entity> listVotePetition(@Named("listSignature") String listSignature) {
 			Query q = new Query("Vote")
@@ -193,7 +269,5 @@ public class PetitionEndpoint {
 			}
 			return result;
 		}
-		
-		
 	
 }

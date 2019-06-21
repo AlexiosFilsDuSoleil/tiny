@@ -47,19 +47,31 @@
 			    	return m("main", [
 			    		m("div", {class:"container"}, [
 				            m("h1", {class: "title"}, "TinyPet in Cloud'Giroffle"),
-				            m("h2", {class: "title"}, "Liste des pétitions :"),
+				            m("button.btn btn-success", {onclick: function(){
+				            	m.route.set('/100')
+				            }},"100 best pétitions"),
+				            m("h2", {class: "title"}, "Liste des pétitions par ordre alphabétique:"),
 				            m("table.table table-hover",[
 				            	m("thead", [
 				            		m("tr",[
 				            			m("th", "Nom"),
 				            			m("th", "Description"),
 				            			m("th","Vote"),
+				            			m("th","Signer"),
 				            		]),
 				            	]),
 				        		m(PetitionView)	
 				            ]),
-				            m("div.container", {style:"text-align:center"}, [
-					            m("button.btn btn-warning", {style:"margin-right:50px", onclick: function(){
+				            m("div", {style:"text-align:center"}, [
+					            m("button.btn btn-danger", {style:"margin-right:50px",onclick: function(){
+					            	Petition.prev()
+					            }},"Précédent"),
+					            m("button.btn btn-danger",{onclick: function(){
+					            	Petition.next()
+					            }}, "Suivant"),
+				            ]),
+				            m("div", {style:"text-align:center"}, [
+					            m("button.btn btn-warning", {style:"margin-right:50px",onclick: function(){
 					            	m.route.set('/myPetition')
 					            }},"Mes pétitions"),
 					            m("button.btn btn-dark",{onclick: function(){
@@ -68,8 +80,8 @@
 				            ]),
 				            m("h2", {class: "title"}, "Formulaire de création de pétition :"),
 				            m("div", {id: "petitionFormorm"}, m(CreationPetitionForm)),
-				            m("h2", {class: "title"}, "Formulaire de création de vote :"),
-				            m("div", {id: "voteForm"}, m(CreationVoteForm)),
+				           /* m("h2", {class: "title"}, "Formulaire de création de vote :"),
+				            m("div", {id: "voteForm"}, m(CreationVoteForm)),*/
 				            m("div", {class: "g-signin2", "data-onsuccess":"onSignIn"}),
 				            m("a",{onclick: function(){
 				            	signOut()
@@ -101,6 +113,27 @@
 			    }
 			}	
 		
+		var DisplayBest = {
+			    view: function() {
+			    	return m("main", [
+			    		m("div", {class:"container"}, [
+				            m("h1", {class: "title"}, "Les 100 meilleures"),
+				            m("h2", {class: "title"}, "Liste des pétitions :"),
+				            m("table.table table-hover",[
+				            	m("thead", [
+				            		m("tr",[
+				            			m("th", "Nom"),
+				            			m("th", "Description"),
+				            			m("th","Vote"),
+				            		]),
+				            	]),
+				        		m(BestPetition)	
+				            ]),
+			            ]),
+			        ])
+			    }
+			}	
+		
 		//Affichage de la page des pétitions créées
 		var DisplayPetitionVoteUser = {
 			    view: function() {
@@ -123,6 +156,26 @@
 			    }
 			}	
 		
+		var DisplayVoteOfPetition = {
+			    view: function() {
+			    	return m("main", [
+			    		m("div", {class:"container"}, [
+				            
+				            m("h2", {class: "title"}, "Liste des votes : "),
+				            m("table.table table-hover",[
+				            	m("thead", [
+				            		m("tr",[
+				            			m("th", "Email"),
+				            			
+				            		]),
+				            	]),
+				        		m(SignaturePetView)	
+				            ]),
+			            ]),
+			        ])
+			    }
+			}	
+		
 		//PETITIONS
 		var Petition = {
 			
@@ -131,15 +184,56 @@
 	    	loadList: function() {
 	        	return m.request({
 	            	method: "GET",
-	            	url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/entity/"
+	            	url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listBestPetition"
 	        	})
 	        	.then(function(result) {
 	            	Petition.list = result.items
-	        		console.log("got:",result.items)
+	        		console.log("got best:",result.items)
 	        		m.redraw(true) // force
 	        	})
 	    	},
-	    	
+	    	prev:function(){
+	    		console.log("get Prev cursor")
+	    		return m.request({
+		            method: "GET",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/nextCursor/prev/"+Petition.list[0].properties.titrePetition,
+		          
+		       	})
+		       	.then(function(result) 
+		       	{
+		       		
+	        		if(result !== null)
+	        		{
+	        			
+	        			console.log("result prev:",result.items)
+	        			if(result.items.length !== 0){
+	        				Petition.list = result.items
+	        				m.redraw(true)
+	        			}
+	        		}
+		       	})
+	    	},
+	    	next:function(){
+	    		console.log("get Next cursor")
+	    		return m.request({
+		            method: "GET",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/nextCursor/next/"+Petition.list[Petition.list.length -1].properties.titrePetition,
+		          
+		       	})
+		       	.then(function(result) 
+		       	{
+		       		
+	        		if(result !== null)
+	        		{
+	        			
+	        			console.log("result next:",result.items)
+	        			if(result.items.length !== 0){
+	        				Petition.list = result.items
+	        				m.redraw(true)
+	        			}
+	        		}
+		       	})
+	    	},
 	    	current: {},
 	    	myPetitionList: [],
 	    	getMyPetition: function(){
@@ -154,10 +248,26 @@
 	        		{
 	        			console.log("resultRequete:",result)
 	        			Petition.myPetitionList = result.items
+	        			m.redraw(true)
 	        		}
 		       	})
 	    	},
-	    	
+	    	getBestPetition : function(){
+	    		return m.request({
+		            method: "GET",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/listeBestOfPetition",
+		          
+		       	})
+		       	.then(function(result) 
+		       	{
+	        		if(result !== null)
+	        		{
+	        			console.log("best 100 :",result)
+	        			Petition.myPetitionList = result.items
+	        			m.redraw(true)
+	        		}
+		       	})
+	    	},
 	    	getPetition : function(){
 	    		return m.request({
 		            method: "GET",
@@ -168,7 +278,8 @@
 	        		if(result === null)
 	        		{
 	        			Petition.save()
-	        			m.route.set('/home')
+	        			document.CreationPetitionForm.view.getElementById("titrePetitionForm").reset()
+	        			
 	        		}
 	        		else
 	        		{
@@ -176,9 +287,20 @@
 	        		}
 		       	})
 	    	},
-	    	getInfosPetition :function(){
-	    		return alert("bonjour")
+	    	votePetitionList :[],
+	    	getVotePetition : function(){
+	    		return m.request({
+		            method: "GET",
+		            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/VotePetition/Essai",
+		            withCredentials: true,
+		       	})
+		       	.then(function(result) 
+		       	{
+            		Petition.votePetitionList = result.items   
+            		m.redraw(true)
+        		})
 	    	},
+	    	
 	    	//Sauvegarde des données via le formulaire
 	    	save: function() {
 	    		console.log("saving...",Petition.current)
@@ -191,6 +313,7 @@
 	        	.then(function(result) {
 	        		console.log("got:",result)
 	        		Petition.loadList()
+	        		alert("Votre pétition a bien été créée")
 	        	})
 	    	}
 		}
@@ -253,6 +376,7 @@
             				if(!trouve){
             					Vote.save()
     	            			m.route.set('/home')
+    	            			
             				}else{
             					alert("vous avez deja signé")
             				}
@@ -260,6 +384,7 @@
 		        		}
 			       	})
 		    	},
+		    	
 		    	getPetition : function(){
 					return m.request({
 			            method: "GET",
@@ -288,9 +413,10 @@
 			            url: "https://tinypetincloudgiroffle.appspot.com/_ah/api/myApi/v1/addVote/"+Vote.current.titrePetitionVote+"/"+ProfileUser.infos.email+"/"+ProfileUser.infos.nom
 		        	})
 		        	.then(function(result) {
-		        		console.log("got:",result)
+		        		console.log("got save vote:",result)
 		        		m.route.set("/home")
-		        		m.redraw(true)
+		        		PetitionView.oninit()
+		        		
 		        	})
 		    	}
 			}
@@ -300,12 +426,24 @@
 			oninit: Petition.loadList,
 		    view: function() {
 		    	return m("tbody", Petition.list.map(function(item) {
-		            return m("tr", {onclick:function(){
-		            	alert(item.properties.titrePetition)
-		            }} ,[
-		        			m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
-		        			m("td.user-list-item",item.properties.descriptionPetition),
-		        			m("td.user-list-item",item.properties.nbSignature),
+		            return m("tr", [
+		        			m("th.user-list-item", {onclick:function(){
+				            	m.route.set("/VotePetition")
+				            } ,scope:"row"}, item.properties.titrePetition),
+		        			m("td.user-list-item",{onclick:function(){
+				            	alert(item.properties.titrePetition)
+				            }} ,item.properties.descriptionPetition),
+		        			m("td.user-list-item",{onclick:function(){
+				            	alert(item.properties.titrePetition)
+				            }} ,item.properties.nbSignature),
+		        			m("td",[m("button.btn btn-primary", {onclick: function(){
+		        				if(ProfileUser.infos.id === ""){
+			                		alert("Hep hep hep t'est pas connecté, clique sur le bouton 'Connexion' pour pouvoir ensuite voter")
+			                	}else{
+		        					Vote.current.titrePetitionVote = item.properties.titrePetition
+		        					Vote.getPetition()
+			                	}
+				            }},"Signer")]),
 		        		])
 		        }))
 		    },	
@@ -326,6 +464,34 @@
 		        }))
 		    },	
 		}
+		
+		var SignaturePetView = {
+				oninit: Petition.getVotePetition,
+			    view: function() {
+			    	console.log(Petition.votePetitionList)
+			    	return m("tbody", Petition.votePetitionList.map(function(item) {
+			    		console.log("asse")
+			            return m("tr",[
+			        			m("th.user-list-item", {scope:"row"}, item.email),
+			        		])
+			        }))
+			    },	
+			}
+		
+		var BestPetition = {
+				oninit: Petition.getBestPetition,
+			    view: function() {
+			    	return m("tbody", Petition.myPetitionList.map(function(item) {
+			            return m("tr", {onclick:function(){
+			            	alert(item.properties.titrePetition)
+			            }} ,[
+			        			m("th.user-list-item", {scope:"row"}, item.properties.titrePetition),
+			        			m("td.user-list-item",item.properties.descriptionPetition),
+			        			m("td.user-list-item",item.properties.nbSignature),
+			        		])
+			        }))
+			    },	
+			}
 		
 		//RECUPERATION DES PETITIONS ET AFFICHAGE
 		var MyVoteView = {
@@ -364,7 +530,7 @@
 			            }, [
 			            m("div.form-group", [
 			            	m("label","Titre :"),
-				            m("input.form-control[type=text][placeholder=Titre de la pétition]",{
+				            m("input#titrePetitionForm.form-control[type=text][placeholder=Titre de la pétition]",{
 				                oninput: function (e) {Petition.current.titrePetition=e.target.value},
 				                value: Petition.current.titrePetition
 				            })
@@ -382,7 +548,7 @@
 			    }
 		}
 		
-		//Formulaire de création de Vote
+		/*//Formulaire de création de Vote
 		var CreationVoteForm = {
 				view: function() {
 			        return m("form", {
@@ -409,11 +575,13 @@
 			            m("button.btn btn-primary[type=submit]", "Voter"),
 			        ])
 			    }
-		}
+		}*/
 		m.route(document.body, "/home", {
 	  		"/home": Body,
 	  		"/myPetition": DisplayPetitionUser,
 	  		"/myVote":DisplayPetitionVoteUser,
+	  		"/100":DisplayBest,
+	  		"/VotePetition":DisplayVoteOfPetition,
 	  	})
   	
 
