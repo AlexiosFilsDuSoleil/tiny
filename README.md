@@ -14,6 +14,7 @@ Api explorer : https://apis-explorer.appspot.com/apis-explorer/?base=https%3A%2F
 
 Sur cette capture on voitl'entité Petition.
 Elle comprend plusieurs champs. Sa clé est son nom. Deux pétitions ne peuvent pas avoir le même nom dans le datastore.
+Cette entité possède également une property 'dateCreation' qui permettrait plus tard de trié les pétitions par ordre de création.
 
 ![image of vote](/images/EntiteVote.png)
 
