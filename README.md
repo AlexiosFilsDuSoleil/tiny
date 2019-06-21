@@ -24,3 +24,4 @@ Chaque row a une clé parent qui est une référence à l'entité Petition. Sa c
 Afin d'utiliser l'application il faudra que vous soyer connecté grâce à un vos identifiants google. 
 Il se peut que le bouton d'authentification situé en bas de la page ne soit pas visible. VOus devrez donc rafraichir la page à l'aide de la touche F5 de votre clavier.
 
+![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
